@@ -29,18 +29,20 @@ void main() {
   AsymmetricKeyPair keyPair = rsaGenerateKeyPair();
 
   ASN1ObjectIdentifier.registerFrequentNames();
+  Map<String, String> dn = {
+    "CN": "www.davidjanes.com",
+    "O": "Consensas",
+    "L": "Toronto",
+    "ST": "Ontario",
+    "C": "CA",
+  };
 
+  ASN1Object encodedCSR = makeRSACSR(dn, keyPair.privateKey, keyPair.publicKey);
 
-  //String dn_string = jsonEncode(Info);
-
-  ASN1Object encodedCSR = makeRSACSR(Info, keyPair.privateKey, keyPair.publicKey);
-  //print(encodedCSR);
   print(encodeCSRToPem(encodedCSR));
-  //print(keyPair.publicKey);
   print(encodeRSAPublicKeyToPem(keyPair.publicKey));
   print(encodeRSAPrivateKeyToPem(keyPair.privateKey));
 }
-
 
 
 AsymmetricKeyPair rsaGenerateKeyPair({int bitStrength = 2048}) {
@@ -145,8 +147,12 @@ List<String> chunk(String s, int chunkSize) {
 }
 
 encodeCSRToPem(ASN1Object csr) {
-  List<String> chunks = chunk(base64.encode(csr.encodedBytes), 256);
-  return """-----BEGIN CERTIFICATE REQUEST-----\r\n${chunks.join("\r\n")}\r\n-----END CERTIFICATE REQUEST-----\r\n""";
+  List<String> chunks = chunk(base64.encode(csr.encodedBytes), 16);
+  String csr1 = chunks.join("");
+  String begin = "-----BEGIN CERTIFICATE REQUEST-----";
+  String end = "-----END CERTIFICATE REQUEST-----";
+  return begin + csr1 + end;
+  //return """-----BEGIN CERTIFICATE REQUEST-----\r\n${chunks.join("")}\r\n-----END CERTIFICATE REQUEST-----\r\n""";
 }
 
 
@@ -206,7 +212,7 @@ encodeRSAPrivateKeyToPem(privateKey) {
 
   List<String> chunks = chunk(dataBase64, 256);
 
-  return """-----BEGIN PRIVATE KEY-----\r\n${chunks.join("\r\n")}\r\n-----END PRIVATE KEY-----\r\n""";
+  return """-----BEGIN PRIVATE KEY-----\r\n${chunks.join("")}\r\n-----END PRIVATE KEY-----\r\n""";
 }
 
 
